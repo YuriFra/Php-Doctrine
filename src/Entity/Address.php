@@ -105,7 +105,7 @@ class Address
      */
     public function setCity(string $city): self
     {
-        $this->city = $city;
+        return $this->city = $city;
     }
 
     public function toArray(): array

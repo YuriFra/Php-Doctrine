@@ -5,8 +5,6 @@ namespace App\Entity;
 use App\Repository\StudentRepository;
 use Doctrine\ORM\Mapping as ORM;
 use Doctrine\ORM\Mapping\Embedded;
-use Doctrine\ORM\Mapping\ManyToOne;
-
 
 /**
  * @ORM\Entity(repositoryClass=StudentRepository::class)
@@ -18,32 +16,31 @@ class Student
      * @ORM\GeneratedValue()
      * @ORM\Column(type="integer")
      */
-    private ?int $id;
+    private $id;
 
     /**
      * @ORM\Column(type="string", length=255)
      */
-    private ?string $first_name;
+    private $first_name;
 
     /**
      * @ORM\Column(type="string", length=255)
      */
-    private ?string $last_name;
-
-    /**
-     * @ORM\Column(type="string", length=255)
-     */
-    private ?string $email;
+    private $last_name;
 
     /** @Embedded(class = "Address") */
-    private ?Address $address;
+    private $address;
 
     /**
-     * Many students have one teacher.
-     * @ORM\ManyToOne(targetEntity="App\Entity\Teacher", inversedBy="students")
+     * @ORM\Column(type="string", length=255)
+     */
+    private $email;
+
+    /**
+     * @ORM\ManyToOne(targetEntity=Teacher::class, inversedBy="students")
      * @ORM\JoinColumn(nullable=false)
      */
-    private ?Teacher $teacher;
+    private $teacher;
 
     public function getId(): ?int
     {
@@ -74,6 +71,18 @@ class Student
         return $this;
     }
 
+    public function getAddress(): ?string
+    {
+        return $this->address;
+    }
+
+    public function setAddress(string $address): self
+    {
+        $this->address = $address;
+
+        return $this;
+    }
+
     public function getEmail(): ?string
     {
         return $this->email;
@@ -86,26 +95,16 @@ class Student
         return $this;
     }
 
-    public function getAddress(): ?Address
-    {
-        return $this->address;
-    }
-
-    public function setAddress(Address $address): self
-    {
-        $this->address = $address;
-
-        return $this;
-    }
-
-    public function getTeacher() : ?Teacher
+    public function getTeacher(): ?Teacher
     {
         return $this->teacher;
     }
 
-    public function setTeacher(?Teacher $teacher): void
+    public function setTeacher(?Teacher $teacher): self
     {
         $this->teacher = $teacher;
+
+        return $this;
     }
 
     public function toArray(): array

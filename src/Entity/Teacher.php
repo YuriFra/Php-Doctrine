@@ -4,9 +4,9 @@ namespace App\Entity;
 
 use App\Repository\TeacherRepository;
 use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Doctrine\ORM\Mapping\Embedded;
-use Doctrine\ORM\Mapping\OneToMany;
 
 /**
  * @ORM\Entity(repositoryClass=TeacherRepository::class)
@@ -18,44 +18,34 @@ class Teacher
      * @ORM\GeneratedValue()
      * @ORM\Column(type="integer")
      */
-    private ?int $id;
+    private $id;
 
     /**
      * @ORM\Column(type="string", length=255)
      */
-    private ?string $first_name;
+    private $first_name;
 
     /**
      * @ORM\Column(type="string", length=255)
      */
-    private ?string $last_name;
+    private $last_name;
 
     /** @Embedded(class = "Address") */
-    private ?string $address;
+    private $address;
 
     /**
-     * @ORM\Column(type="string", length=255, unique=true)
+     * @ORM\Column(type="string", length=255)
      */
-    private ?string $email;
+    private $email;
 
     /**
-     * One teacher has many students.
-     * @OneToMany(targetEntity="App\Entity\Student", mappedBy="teacher")
-     * @ORM\JoinColumn(nullable=false)
+     * @ORM\OneToMany(targetEntity=Student::class, mappedBy="teacher")
      */
-    private ArrayCollection $students;
+    private $students;
 
     public function __construct()
     {
         $this->students = new ArrayCollection();
-    }
-
-    /**
-     * @return ArrayCollection
-     */
-    public function getStudents(): ArrayCollection
-    {
-        return $this->students;
     }
 
     public function getId(): ?int
@@ -68,9 +58,11 @@ class Teacher
         return $this->first_name;
     }
 
-    public function setFirstName(string $first_name): string
+    public function setFirstName(string $first_name): self
     {
-        return $this->first_name = $first_name;
+        $this->first_name = $first_name;
+
+        return $this;
     }
 
     public function getLastName(): ?string
@@ -78,9 +70,11 @@ class Teacher
         return $this->last_name;
     }
 
-    public function setLastName(string $last_name): string
+    public function setLastName(string $last_name): self
     {
-        return $this->last_name = $last_name;
+        $this->last_name = $last_name;
+
+        return $this;
     }
 
     public function getAddress(): ?string
@@ -104,6 +98,36 @@ class Teacher
     {
         $this->email = $email;
 
+        return $this;
+    }
+
+    /**
+     * @return Collection|Student[]
+     */
+    public function getStudents(): Collection
+    {
+        return $this->students;
+    }
+
+    public function addPupil(Student $student): self
+    {
+        if (!$this->students->contains($student)) {
+            $this->students[] = $student;
+            $student->setTeacher($this);
+        }
+
+        return $this;
+    }
+
+    public function removePupil(Student $student): self
+    {
+        if ($this->students->contains($student)) {
+            $this->students->removeElement($student);
+            // set the owning side to null (unless already changed)
+            if ($student->getTeacher() === $this) {
+                $student->setTeacher(null);
+            }
+        }
         return $this;
     }
 
