@@ -41,7 +41,7 @@ class Teacher
     /**
      * @ORM\OneToMany(targetEntity=Student::class, mappedBy="teacher")
      */
-    private $students;
+    private Collection $students;
 
     public function __construct()
     {
@@ -77,12 +77,12 @@ class Teacher
         return $this;
     }
 
-    public function getAddress(): ?string
+    public function getAddress(): Address
     {
         return $this->address;
     }
 
-    public function setAddress(string $address): self
+    public function setAddress(Address $address): self
     {
         $this->address = $address;
 
@@ -109,7 +109,7 @@ class Teacher
         return $this->students;
     }
 
-    public function addPupil(Student $student): self
+    public function addStudent(Student $student): self
     {
         if (!$this->students->contains($student)) {
             $this->students[] = $student;
@@ -119,7 +119,7 @@ class Teacher
         return $this;
     }
 
-    public function removePupil(Student $student): self
+    public function removeStudent(Student $student): self
     {
         if ($this->students->contains($student)) {
             $this->students->removeElement($student);
