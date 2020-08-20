@@ -39,7 +39,7 @@ class Teacher
     private $email;
 
     /**
-     * @ORM\OneToMany(targetEntity=Student::class, mappedBy="teacher")
+     * @ORM\OneToMany(targetEntity=Student::class, mappedBy="teacher", orphanRemoval=true)
      */
     private Collection $students;
 
@@ -133,12 +133,17 @@ class Teacher
 
     public function toArray(): array
     {
+        $studentList = [];
+        foreach ($this->getStudents() as $student) {
+            $studentList[] .= $student->getFirstName(). " ".$student->getLastName();
+        }
+
         return [
             'first_name' => $this->getFirstName(),
             'last_name' => $this->getLastName(),
             'address' => $this->getAddress()->toArray(),
             'email' => $this->getEmail(),
-            'students'=> $this->getStudents()
+            'students'=> $studentList
         ];
     }
 }

@@ -15,7 +15,7 @@ use Symfony\Component\HttpFoundation\Response;
 class StudentController extends AbstractController
 {
     /**
-     * @Route("/student", name="student")
+     * @Route("/studentBase", name="student")
      */
     public function index(): Response
     {
@@ -25,7 +25,7 @@ class StudentController extends AbstractController
     }
 
     /**
-     * @Route("/students/", name="add_student", methods={"POST"})
+     * @Route("/student/", name="add_student", methods={"POST"})
      * @param Request $request
      * @return JsonResponse
      * @throws \JsonException
@@ -38,9 +38,13 @@ class StudentController extends AbstractController
             throw new NotFoundHttpException('Required input missing!');
         }
 
-        $address = new Address($data['address']['street'], $data['address']['streetNumber'], $data['address']['zipcode'], $data['address']['city']);
+        $address = new Address($data['address']['street'], $data['address']['street_number'], $data['address']['zipcode'], $data['address']['city']);
 
         $teacher = $this->getDoctrine()->getRepository(Teacher::class)->find($data['teacher_id']);
+
+        if (empty($data['teacher_id'])) {
+            throw new NotFoundHttpException('Teacher id does not exist!');
+        }
 
         $student = new Student();
         $student->setFirstName($data['first_name'])
@@ -56,6 +60,110 @@ class StudentController extends AbstractController
         $entityManager->flush();
 
         return new JsonResponse(['status' => 'Student saved!'], Response::HTTP_CREATED);
+    }
+
+    /**
+     * @Route("/student/{id}", name="get_student_detail", methods={"GET"})
+     * @param $id
+     * @return JsonResponse
+     */
+    public function get($id): JsonResponse
+    {
+        $student = $this->getDoctrine()->getRepository(Student::class)->find($id);
+
+        if (empty($id)) {
+            throw new NotFoundHttpException('No student with this ID!');
+        }
+
+        $data = [
+            'id' => $student->getId(),
+            'first_name' => $student->getFirstName(),
+            'last_name' => $student->getLastName(),
+            'email' => $student->getEmail(),
+            'street' => $student->getAddress()->getStreet(),
+            'street_number' => $student->getAddress()->getStreetNumber(),
+            'zipcode' => $student->getAddress()->getZipcode(),
+            'city' => $student->getAddress()->getCity(),
+            'teacher' => $student->getTeacher()->getFirstName()
+        ];
+
+        return new JsonResponse($data, Response::HTTP_OK);
+    }
+
+    /**
+     * @Route("/students", name="get_all_students", methods={"GET"})
+     */
+    public function getAll(): JsonResponse
+    {
+        $students = $this->getDoctrine()->getRepository(Student::class)->findAll();
+        $data = [];
+
+        foreach ($students as $student) {
+            $data[] = [
+                'id' => $student->getId(),
+                'name' => $student->getFirstName()." ".$student->getLastName(),
+                'email' => $student->getEmail(),
+                'city' => $student->getAddress()->getCity(),
+                'teacher' => $student->getTeacher()->getFirstName()
+            ];
+        }
+
+        return new JsonResponse($data, Response::HTTP_OK);
+    }
+
+    /**
+     * @Route("/student/{id}", name="update_student", methods={"PUT"})
+     * @param $id
+     * @param Request $request
+     * @return JsonResponse
+     */
+    public function update($id, Request $request): JsonResponse
+    {
+        $student = $this->getDoctrine()->getRepository(Student::class)->find($id);
+
+        if (empty($id)) {
+            throw new NotFoundHttpException('No student with this ID!');
+        }
+
+        $data = json_decode($request->getContent(), true);
+
+        $address = new Address($data['address']['street'], $data['address']['street_number'], $data['address']['zipcode'], $data['address']['city']);
+
+        $teacher = $this->getDoctrine()->getRepository(Teacher::class)->find($data['teacher_id']);
+
+        if (empty($data['teacher_id'])) {
+            throw new NotFoundHttpException('Teacher id does not exist!');
+        }
+
+        empty($data['first_name']) ? true : $student->setFirstName($data['first_name']);
+        empty($data['last_name']) ? true : $student->setLastName($data['last_name']);
+        empty($data['email']) ? true : $student->setEmail($data['email']);
+        empty($data['address']) ? true : $student->setAddress($address);
+        empty($data['teacher_id']) ? true : $student->setTeacher($teacher);
+
+        $this->getDoctrine()->getManager()->persist($student);
+        $this->getDoctrine()->getManager()->flush();
+
+        return new JsonResponse($student->toArray(), Response::HTTP_OK);
+    }
+
+    /**
+     * @Route("/student/{id}", name="delete_student", methods={"DELETE"})
+     * @param $id
+     * @return JsonResponse
+     */
+    public function delete($id): JsonResponse
+    {
+        $student = $this->getDoctrine()->getRepository(Student::class)->find($id);
+
+        if (empty($id)) {
+            throw new NotFoundHttpException('No student with this ID!');
+        }
+
+        $this->getDoctrine()->getManager()->remove($student);
+        $this->getDoctrine()->getManager()->flush();
+
+        return new JsonResponse(['status' => 'Student deleted'], Response::HTTP_OK);
     }
 
 }

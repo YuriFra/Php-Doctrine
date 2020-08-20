@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Entity\Address;
+use App\Entity\Student;
 use App\Entity\Teacher;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -14,7 +15,7 @@ use Symfony\Component\Routing\Annotation\Route;
 class TeacherController extends AbstractController
 {
     /**
-     * @Route("/teacher/", name="teacher")
+     * @Route("/teacherBase/", name="teacher")
      */
     public function index()
     {
@@ -24,7 +25,7 @@ class TeacherController extends AbstractController
     }
 
     /**
-     * @Route("/teachers/", name="add_teacher", methods={"POST"})
+     * @Route("/teacher/", name="add_teacher", methods={"POST"})
      * @param Request $request
      * @return JsonResponse
      * @throws \JsonException
@@ -50,5 +51,73 @@ class TeacherController extends AbstractController
         $entityManager->flush();
 
         return new JsonResponse(['status' => 'Teacher saved!'], Response::HTTP_CREATED);
+    }
+
+    /**
+     * @Route("/teacher/{id}", name="get_teacher_detail", methods={"GET"})
+     * @param $id
+     * @return JsonResponse
+     */
+    public function get($id): JsonResponse
+    {
+        $teacher = $this->getDoctrine()->getRepository(Teacher::class)->find($id);
+
+        if (empty($id)) {
+            throw new NotFoundHttpException('No teacher with this ID!');
+        }
+
+        $data = [
+            'id' => $teacher->getId(),
+            'first_name' => $teacher->getFirstName(),
+            'last_name' => $teacher->getLastName(),
+            'email' => $teacher->getEmail(),
+            'street' => $teacher->getAddress()->getStreet(),
+            'street_number' => $teacher->getAddress()->getStreetNumber(),
+            'zipcode' => $teacher->getAddress()->getZipcode(),
+            'city' => $teacher->getAddress()->getCity(),
+            'students' => $teacher->getStudents()->getValues()
+        ];
+
+        return new JsonResponse($data, Response::HTTP_OK);
+    }
+
+    /**
+     * @Route("/teachers", name="get_all_teachers", methods={"GET"})
+     */
+    public function getAll(): JsonResponse
+    {
+        $teachers = $this->getDoctrine()->getRepository(Teacher::class)->findAll();
+        $data = [];
+
+        foreach ($teachers as $teacher) {
+            $data[] = [
+                'id' => $teacher->getId(),
+                'name' => $teacher->getFirstName()." ".$teacher->getLastName(),
+                'email' => $teacher->getEmail(),
+                'city' => $teacher->getAddress()->getCity(),
+                'students' => $teacher->getStudents()
+            ];
+        }
+
+        return new JsonResponse($data, Response::HTTP_OK);
+    }
+
+    /**
+     * @Route("/teacher/{id}", name="delete_teacher", methods={"DELETE"})
+     * @param $id
+     * @return JsonResponse
+     */
+    public function delete($id): JsonResponse
+    {
+        $teacher = $this->getDoctrine()->getRepository(Teacher::class)->find($id);
+
+        if (empty($id)) {
+            throw new NotFoundHttpException('No student with this ID!');
+        }
+
+        $this->getDoctrine()->getManager()->remove($teacher);
+        $this->getDoctrine()->getManager()->flush();
+
+        return new JsonResponse(['status' => 'Student deleted'], Response::HTTP_OK);
     }
 }
