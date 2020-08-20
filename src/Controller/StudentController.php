@@ -15,7 +15,7 @@ use Symfony\Component\HttpFoundation\Response;
 class StudentController extends AbstractController
 {
     /**
-     * @Route("/studentBase", name="student")
+     * @Route("/studentsBase", name="student")
      */
     public function index(): Response
     {
@@ -25,7 +25,7 @@ class StudentController extends AbstractController
     }
 
     /**
-     * @Route("/student/", name="add_student", methods={"POST"})
+     * @Route("/students/", name="add_student", methods={"POST"})
      * @param Request $request
      * @return JsonResponse
      * @throws \JsonException
@@ -63,7 +63,7 @@ class StudentController extends AbstractController
     }
 
     /**
-     * @Route("/student/{id}", name="get_student_detail", methods={"GET"})
+     * @Route("/students/{id}", name="get_student_detail", methods={"GET"})
      * @param $id
      * @return JsonResponse
      */
@@ -84,7 +84,7 @@ class StudentController extends AbstractController
             'street_number' => $student->getAddress()->getStreetNumber(),
             'zipcode' => $student->getAddress()->getZipcode(),
             'city' => $student->getAddress()->getCity(),
-            'teacher' => $student->getTeacher()->getFirstName()
+            'teacher' => $student->getTeacher()->getFirstName()." ".$student->getTeacher()->getLastName()
         ];
 
         return new JsonResponse($data, Response::HTTP_OK);
@@ -104,7 +104,6 @@ class StudentController extends AbstractController
                 'name' => $student->getFirstName()." ".$student->getLastName(),
                 'email' => $student->getEmail(),
                 'city' => $student->getAddress()->getCity(),
-                'teacher' => $student->getTeacher()->getFirstName()
             ];
         }
 
@@ -112,7 +111,7 @@ class StudentController extends AbstractController
     }
 
     /**
-     * @Route("/student/{id}", name="update_student", methods={"PUT"})
+     * @Route("/students/{id}", name="update_student", methods={"PUT"})
      * @param $id
      * @param Request $request
      * @return JsonResponse
@@ -148,7 +147,7 @@ class StudentController extends AbstractController
     }
 
     /**
-     * @Route("/student/{id}", name="delete_student", methods={"DELETE"})
+     * @Route("/students/{id}", name="delete_student", methods={"DELETE"})
      * @param $id
      * @return JsonResponse
      */

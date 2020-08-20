@@ -37,7 +37,7 @@ class Student
     private $email;
 
     /**
-     * @ORM\ManyToOne(targetEntity=Teacher::class, inversedBy="students", orphanRemoval=true)
+     * @ORM\ManyToOne(targetEntity=Teacher::class, inversedBy="students")
      * @ORM\JoinColumn(nullable=false)
      */
     private $teacher;

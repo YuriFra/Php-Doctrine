@@ -135,7 +135,7 @@ class Teacher
     {
         $studentList = [];
         foreach ($this->getStudents() as $student) {
-            $studentList[] .= $student->getFirstName(). " ".$student->getLastName();
+            $studentList[] = ['name' => $student->getFirstName(). " ".$student->getLastName()];
         }
 
         return [
