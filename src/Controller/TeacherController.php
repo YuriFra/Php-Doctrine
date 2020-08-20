@@ -54,35 +54,16 @@ class TeacherController extends AbstractController
 
     /**
      * @Route("/teachers/{id}", name="get_teacher_detail", methods={"GET"})
-     * @param $id
+     * @param Teacher $teacher
      * @return JsonResponse
      */
-    public function get($id): JsonResponse
+    public function getOne(Teacher $teacher): JsonResponse
     {
-        $teacher = $this->getDoctrine()->getRepository(Teacher::class)->find($id);
-
-        if (empty($id)) {
+        if ($teacher === null) {
             throw new NotFoundHttpException('No teacher with this ID!');
         }
 
-        $studentList = [];
-        foreach ($teacher->getStudents() as $student) {
-            $studentList[] = ['name' => $student->getFirstName(). " ".$student->getLastName()];
-        }
-
-        $data = [
-            'id' => $teacher->getId(),
-            'first_name' => $teacher->getFirstName(),
-            'last_name' => $teacher->getLastName(),
-            'email' => $teacher->getEmail(),
-            'street' => $teacher->getAddress()->getStreet(),
-            'street_number' => $teacher->getAddress()->getStreetNumber(),
-            'zipcode' => $teacher->getAddress()->getZipcode(),
-            'city' => $teacher->getAddress()->getCity(),
-            'students' => $studentList
-        ];
-
-        return new JsonResponse($data, Response::HTTP_OK);
+        return new JsonResponse($teacher->toArray(), Response::HTTP_OK);
     }
 
     /**
@@ -107,15 +88,13 @@ class TeacherController extends AbstractController
 
     /**
      * @Route("/teachers/{id}", name="update_teacher", methods={"PUT"})
-     * @param $id
+     * @param Teacher $teacher
      * @param Request $request
      * @return JsonResponse
      */
-    public function update($id, Request $request): JsonResponse
+    public function update(Teacher $teacher, Request $request): JsonResponse
     {
-        $teacher = $this->getDoctrine()->getRepository(Teacher::class)->find($id);
-
-        if (empty($id)) {
+        if ($teacher === null) {
             throw new NotFoundHttpException('No teacher with this ID!');
         }
 
@@ -136,14 +115,12 @@ class TeacherController extends AbstractController
 
     /**
      * @Route("/teachers/{id}", name="delete_teacher", methods={"DELETE"})
-     * @param $id
+     * @param Teacher $teacher
      * @return JsonResponse
      */
-    public function delete($id): JsonResponse
+    public function delete(Teacher $teacher): JsonResponse
     {
-        $teacher = $this->getDoctrine()->getRepository(Teacher::class)->find($id);
-
-        if (empty($id)) {
+        if ($teacher === null) {
             throw new NotFoundHttpException('No teacher with this ID!');
         }
 
