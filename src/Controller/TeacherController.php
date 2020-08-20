@@ -106,6 +106,35 @@ class TeacherController extends AbstractController
     }
 
     /**
+     * @Route("/teachers/{id}", name="update_teacher", methods={"PUT"})
+     * @param $id
+     * @param Request $request
+     * @return JsonResponse
+     */
+    public function update($id, Request $request): JsonResponse
+    {
+        $teacher = $this->getDoctrine()->getRepository(Teacher::class)->find($id);
+
+        if (empty($id)) {
+            throw new NotFoundHttpException('No teacher with this ID!');
+        }
+
+        $data = json_decode($request->getContent(), true);
+
+        $address = new Address($data['address']['street'], $data['address']['street_number'], $data['address']['zipcode'], $data['address']['city']);
+
+        empty($data['first_name']) ? true : $teacher->setFirstName($data['first_name']);
+        empty($data['last_name']) ? true : $teacher->setLastName($data['last_name']);
+        empty($data['email']) ? true : $teacher->setEmail($data['email']);
+        empty($data['address']) ? true : $teacher->setAddress($address);
+
+        $this->getDoctrine()->getManager()->persist($teacher);
+        $this->getDoctrine()->getManager()->flush();
+
+        return new JsonResponse($teacher->toArray(), Response::HTTP_OK);
+    }
+
+    /**
      * @Route("/teachers/{id}", name="delete_teacher", methods={"DELETE"})
      * @param $id
      * @return JsonResponse
